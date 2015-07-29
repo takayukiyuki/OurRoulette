@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Our Roulette</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="result">%1$s</string>
+</resources>
