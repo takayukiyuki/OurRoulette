@@ -1,84 +1,76 @@
 package com.example.andoutakayuki.ourroulette;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 
 /**
  * Created by andoutakayuki on 15/07/24.
  */
-public class ResultActivity extends Activity {
-    final static String DB_NAME = "userDB.db";
-    final static int DB_VERSION = 1;
-    final static String DB_TABLE = "userDB";
-    ArrayList<String> list;
-
+public class ResultActivity extends AppCompatActivity {
+    public static String GroupName;
+    private static Intent intent;
+    private static Cursor c;
     private SQLiteDatabase db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
-        Intent intent = getIntent();
-        Log.d("MyDebug", intent.getStringExtra("result"));
-        TextView textView = (TextView)findViewById(R.id.resultText);
-        textView.setText(getString(R.string.result,intent.getStringExtra("result")));
-        //staticなのにnew????
-        DBhelper dbhelper = new DBhelper(this);
-        db = dbhelper.getWritableDatabase();
-        list = intent.getStringArrayListExtra("list");
+        intent = getIntent();
+        TextView textView1 = (TextView) findViewById(R.id.resultText);
+        textView1.setText(getString(R.string.result, intent.getStringExtra("result")));
+        TextView textView2 = (TextView) findViewById(R.id.groupText);
+        textView2.setText(getString(R.string.group_name, intent.getStringExtra("GroupName")));
+        ListView listView = (ListView)findViewById(R.id.resultList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1);
+        for(String s:intent.getStringArrayListExtra("resultList")){
+            adapter.add(s);
+        }
+        listView.setAdapter(adapter);
+    }
+
+    public void saveButton(View v) {
+        intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuItem menuItem = menu.add(0, MainActivity.MENU_ITEM, 0, "HOME");
+        menuItem.setIcon(R.drawable.notepad);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
+        return true;
     }
 
 
-    public void saveButton(View v){
-        try{
-            for(String name:list) {
-                writeDB("name",name);
-            }
-        }catch (Exception e){
-        }
-    }
-
-
-    private void writeDB(String name,String GroupName)throws Exception{
-        ContentValues values = new ContentValues();
-        int count = 0;
-        values.put("id","0");
-        values.put("name",name);
-        values.put("GroupName",GroupName);
-        int colNum = db.update(DB_TABLE,values,null,null);
-        if(colNum == 0){
-            db.insert(DB_TABLE,"",values);
-        }
-    }
-
-
-
-    //classの中にclass？？？
-    private static class DBhelper extends SQLiteOpenHelper{
-        public DBhelper(Context context){
-            super(context,DB_NAME,null, DB_VERSION);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            db.execSQL("create table if not exits " + DB_TABLE + "(Id text primary key,Name text,GroupName text)");
-
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("drop table if exists " + DB_TABLE);
-            onCreate(db);
-        }
-    }
 }
